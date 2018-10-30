@@ -168,7 +168,7 @@ module selftest (
         else{
           selftestoutput = {4d1, 4d2, 4d0, 4d0}; //screen shows 1200 - CMPLT case(12) and fail(00)
           }
-        state.d = state.CMPLT;
+        state.d = state.CMPLE;
         
       state.CMPLE:
         alu.alufn = 6b110101;
