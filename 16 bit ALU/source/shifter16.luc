@@ -1,0 +1,21 @@
+module shifter16 (    
+    input a[16], // 16-bit input a
+    input b[16], // 16-bit input b
+    input alufn[6],
+    output out[16] // 16-bit shift output
+    ){  
+
+  always {
+    // ALUFN controls which of the operations to be used
+    case(alufn[1:0]){ 
+      b00: // Shift Left (SHL)
+        out = a << b[3:0]; // a shift left by up to 15 bits
+      b01: // Shift Right (SHR)
+        out = a >> b[3:0]; // a shift right by up to 15 bits
+      b11: // Shift Right with sign extension (SRA)
+        out = $signed(a) >>> b[3:0]; // a shift right with sign extension by up to 15 bits
+      default:
+        out = 0;
+      }
+  }
+}

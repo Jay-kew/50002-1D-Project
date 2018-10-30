@@ -1,0 +1,195 @@
+module selftest (
+    input clk,
+    input rst,
+    output selftestoutput[4][4] // output passed to io_shield display output
+  ) {
+
+  const CLOCK_SPEED = 25; // clock update speed
+  dff counter[CLOCK_SPEED](.clk(clk), .rst(rst)); // counter for clock
+
+  alu alu; // instantiate alu to call logic
+
+  .clk(counter.q[CLOCK_SPEED-1]){ //Make fsm speed equal to counter
+    fsm state(.rst(rst)) = {START, ADD, SUB, MUL, AND, OR, XOR, A, SHL, SHR, SRA, CMPEQ, CMPLT, CMPLE}; // Different ALU operations
+      }
+    
+  always {
+    // Increase the counter 
+    counter.d = counter.q + 1;
+
+    // Testing ALU operations
+     case(state.q){
+      state.START:
+        alu.alufn = 0;         
+        selftestoutput = {4d0, 4d0, 4d0, 4d0};
+        alu.a = 0;
+        alu.b = 0;            
+        state.d = state.ADD;
+     
+      state.ADD:
+        alu.alufn = 6b000000;
+        alu.a = 16b101;
+        alu.b = 16b010;
+        if (alu.aluoutput == 16b111){
+          selftestoutput = {4d0, 4d1, 4d1, 4d1}; //screen shows 0111 - ADD case(01) and success(11)
+          }
+        else{
+          selftestoutput = {4d0, 4d1, 4d0, 4d0}; //screen shows 0100 - ADD case(01) and fail(00)
+          }
+        state.d = state.SUB;
+        
+      state.SUB:
+        alu.alufn = 6b000001;
+        alu.a = 16b111;
+        alu.b = 16b010;
+        if (alu.aluoutput == 16b101){
+          selftestoutput = {4d0, 4d2, 4d1, 4d1}; //screen shows 0211 - SUB case(02) and success(11)
+          }
+        else{
+          selftestoutput = {4d0, 4d2, 4d0, 4d0}; //screen shows 0200 - SUB case(02) and fail(00)
+          }
+        state.d = state.MUL;
+        
+      state.MUL:
+        alu.alufn = 6b000010;
+        alu.a = 16b010;
+        alu.b = 16b010;
+        if (alu.aluoutput == 16b100){
+          selftestoutput = {4d0, 4d3, 4d1, 4d1}; //screen shows 0311 - MUL case(03) and success(11)
+          }
+        else{
+          selftestoutput = {4d0, 4d3, 4d0, 4d0}; //screen shows 0300 - MUL case(03) and fail(00)
+          }
+        state.d = state.AND;
+             
+      state.AND:
+        alu.alufn = 6b011000;
+        alu.a = 16b111;
+        alu.b = 16b010;
+        if (alu.aluoutput == 16b010){
+          selftestoutput = {4d0, 4d4, 4d1, 4d1}; //screen shows 0411 - AND case(04) and success(11)
+          }
+        else{
+          selftestoutput = {4d0, 4d4, 4d0, 4d0}; //screen shows 0400 - AND case(04) and fail(00)
+          }
+        state.d = state.OR;
+        
+      state.OR:
+        alu.alufn = 6b011110;
+        alu.a = 16b100;
+        alu.b = 16b010;
+        if (alu.aluoutput == 16b110){
+          selftestoutput = {4d0, 4d5, 4d1, 4d1}; //screen shows 0511 - OR case(05) and success(11)
+          }
+        else{
+          selftestoutput = {4d0, 4d5, 4d0, 4d0}; //screen shows 0500 - OR case(05) and fail(00)
+          }
+        state.d = state.XOR;
+        
+      state.XOR:
+        alu.alufn = 6b010110;
+        alu.a = 16b101;
+        alu.b = 16b011;
+        if (alu.aluoutput == 16b110){
+          selftestoutput = {4d0, 4d6, 4d1, 4d1}; //screen shows 0611 - XOR case(06) and success(11)
+          }
+        else{
+          selftestoutput = {4d0, 4d6, 4d0, 4d0}; //screen shows 0600 - XOR case(06) and fail(00)
+          }
+        state.d = state.A;        
+        
+      state.A:
+        alu.alufn = 6b011010;
+        alu.a = 16b111;
+        alu.b = 16b010;
+        if (alu.aluoutput == 16b111){
+          selftestoutput = {4d0, 4d7, 4d1, 4d1}; //screen shows 0711 - A case(07) and success(11)
+          }
+        else{
+          selftestoutput = {4d0, 4d7, 4d0, 4d0}; //screen shows 0700 - A case(07) and fail(00)
+          }
+        state.d = state.SHL;
+        
+      state.SHL:
+        alu.alufn = 6b100000;
+        alu.a = 16b1111;
+        alu.b = 16b111;
+        if (alu.aluoutput == 16b11110000000){
+          selftestoutput = {4d0, 4d8, 4d1, 4d1}; //screen shows 0811 - SHL case(08) and success(11)
+          }
+        else{
+          selftestoutput = {4d0, 4d8, 4d0, 4d0}; //screen shows 0800 - SHL case(08) and fail(00)
+          }
+        state.d = state.SHR;
+        
+      state.SHR:
+        alu.alufn = 6b100001;
+        alu.a = 16b111100;
+        alu.b = 16b10;
+        if (alu.aluoutput == 16b1111){
+          selftestoutput = {4d0, 4d9, 4d1, 4d1}; //screen shows 0911 - SHR case(09) and success(11)
+          }
+        else{
+          selftestoutput = {4d0, 4d9, 4d0, 4d0}; //screen shows 0900 - SHR case(09) and fail(00)
+          }
+        state.d = state.SRA;
+        
+      state.SRA:
+        alu.alufn = 6b100011;
+        alu.a = 16b111100;
+        alu.b = 16b10;
+        if (alu.aluoutput == 16b0000000000001111){
+          selftestoutput = {4d1, 4d0, 4d1, 4d1}; //screen shows 1011 - SRA case(10) and success(11)
+          }
+        else{
+          selftestoutput = {4d1, 4d0, 4d0, 4d0}; //screen shows 1000 - SRA case(10) and fail(00)
+          }
+        state.d = state.CMPEQ;
+        
+      state.CMPEQ:
+        alu.alufn = 6b110011;
+        alu.a = 16b11;
+        alu.b = 16b11;
+        if (alu.aluoutput == 16b1){
+          selftestoutput = {4d1, 4d1, 4d1, 4d1}; //screen shows 1111 - CMPEQ case(11) and success(11)
+          }
+        else{
+          selftestoutput = {4d1, 4d1, 4d0, 4d0}; //screen shows 1100 - CMPEQ case(11) and fail(00)
+          }
+        state.d = state.CMPLT;
+        
+      state.CMPLT:
+        alu.alufn = 6b110101;
+        alu.a = 16b01;
+        alu.b = 16b11;
+        if (alu.aluoutput == 16b1){
+          selftestoutput = {4d1, 4d2, 4d1, 4d1}; //screen shows 1211 - CMPLT case(12) and success(11)
+          }
+        else{
+          selftestoutput = {4d1, 4d2, 4d0, 4d0}; //screen shows 1200 - CMPLT case(12) and fail(00)
+          }
+        state.d = state.CMPLT;
+        
+      state.CMPLE:
+        alu.alufn = 6b110101;
+        alu.a = 16b01;
+        alu.b = 16b11;
+                  
+        if(alu.aluoutput == 16b1){
+          selftestoutput = {4d1, 4d3, 4d1, 4d1}; //screen shows 1311 - CMPLE case(13) and success(11)
+          }
+        else{
+          selftestoutput = {4d1, 4d3, 4d0, 4d0}; //screen shows 1300 - CMPLE case(13) and fail(00)
+          }
+        state.d = state.START;
+       
+      default:            
+      selftestoutput = {4d0, 4d0, 4d0, 4d0};
+      alu.a = 0;
+      alu.b = 0;
+      alu.alufn = 0;
+      state.d = state.START;
+                             
+    }
+  }
+}
